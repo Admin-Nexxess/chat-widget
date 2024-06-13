@@ -71,60 +71,82 @@
         </div>
     </div>
 
-    <!-- Include Zoho Creator API Script -->
+    <!-- Include Zoho Creator Widget SDK -->
     <script src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Ensure Zoho Creator API is properly initialized
-            ZOHO.embeddedApp.on("PageLoad", function(data) {
-                document.getElementById('send-button').addEventListener('click', function() {
-                    const userInput = document.getElementById('user-input').value;
-                    const chatBox = document.getElementById('chat-box');
+        function initializeZohoCreatorAPI() {
+            console.log("Initializing Zoho Creator API...");
 
-                    if (userInput.trim() === "") {
-                        return; // Do nothing if the input is empty
-                    }
+            if (typeof ZOHO !== 'undefined' && ZOHO !== null) {
+                console.log("ZOHO object is defined, setting up API...");
+                ZOHO.embeddedApp.on("PageLoad", function(data) {
+                    console.log("Page loaded, setting up event listener...");
+                    document.getElementById('send-button').addEventListener('click', function() {
+                        const userInput = document.getElementById('user-input').value;
+                        const chatBox = document.getElementById('chat-box');
 
-                    // Display user message
-                    const userMessage = document.createElement('div');
-                    userMessage.classList.add('message', 'user');
-                    userMessage.textContent = userInput;
-                    chatBox.appendChild(userMessage);
+                        if (userInput.trim() === "") {
+                            console.log("Input is empty, not sending...");
+                            return; // Do nothing if the input is empty
+                        }
 
-                    // Scroll chat box to bottom
-                    chatBox.scrollTop = chatBox.scrollHeight;
+                        // Display user message
+                        const userMessage = document.createElement('div');
+                        userMessage.classList.add('message', 'user');
+                        userMessage.textContent = userInput;
+                        chatBox.appendChild(userMessage);
 
-                    // Submit user input to AI Prompt form
-                    submitToAIPromptForm(userInput);
+                        // Scroll chat box to bottom
+                        chatBox.scrollTop = chatBox.scrollHeight;
 
-                    // Call the Deluge script to get the response
-                    ZOHO.CREATOR.API.executeFunction('AI_Prompt_Chat', { 'message': userInput })
-                        .then(function(response) {
-                            // Check if response is successful
-                            if (response && response.data) {
-                                const assistantMessage = document.createElement('div');
-                                assistantMessage.classList.add('message', 'assistant');
-                                assistantMessage.textContent = response.data;
-                                chatBox.appendChild(assistantMessage);
+                        // Submit user input to AI Prompt form
+                        submitToAIPromptForm(userInput);
 
-                                // Scroll chat box to bottom
-                                chatBox.scrollTop = chatBox.scrollHeight;
-                            } else {
-                                console.error('Error: No response data');
-                            }
-                        })
-                        .catch(function(error) {
-                            console.error('Error:', error);
-                        });
+                        // Call the Deluge script to get the response
+                        ZOHO.CREATOR.API.executeFunction('AI_Prompt_Chat', { 'message': userInput })
+                            .then(function(response) {
+                                console.log("Received response from Deluge script...");
+                                // Check if response is successful
+                                if (response && response.data) {
+                                    const assistantMessage = document.createElement('div');
+                                    assistantMessage.classList.add('message', 'assistant');
+                                    assistantMessage.textContent = response.data;
+                                    chatBox.appendChild(assistantMessage);
 
-                    // Clear input
-                    document.getElementById('user-input').value = '';
+                                    // Scroll chat box to bottom
+                                    chatBox.scrollTop = chatBox.scrollHeight;
+                                } else {
+                                    console.error('Error: No response data');
+                                }
+                            })
+                            .catch(function(error) {
+                                console.error('Error:', error);
+                            });
+
+                        // Clear input
+                        document.getElementById('user-input').value = '';
+                    });
                 });
-            });
 
-            // Initialize Zoho Creator API
-            ZOHO.embeddedApp.init();
+                // Initialize Zoho Creator API
+                ZOHO.embeddedApp.init();
+                console.log("Zoho Creator API initialized.");
+            } else {
+                console.error('ZOHO is not defined');
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOM fully loaded and parsed, loading Zoho Creator SDK...");
+            // Wait for the Zoho Creator API script to load
+            const script = document.createElement('script');
+            script.src = 'https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js';
+            script.onload = initializeZohoCreatorAPI;
+            script.onerror = function() {
+                console.error('Failed to load Zoho Creator API script');
+            };
+            document.head.appendChild(script);
         });
 
         // Function to submit user input to AI Prompt form
