@@ -71,68 +71,60 @@
         </div>
     </div>
 
-    <!-- Include Zoho Creator Widget SDK -->
+    <!-- Include Zoho Creator API Script -->
     <script src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
 
     <script>
-        function initializeZohoCreatorAPI() {
-            if (typeof ZOHO !== 'undefined' && ZOHO !== null) {
-                ZOHO.embeddedApp.on("PageLoad", function(data) {
-                    document.getElementById('send-button').addEventListener('click', function() {
-                        const userInput = document.getElementById('user-input').value;
-                        const chatBox = document.getElementById('chat-box');
-
-                        if (userInput.trim() === "") {
-                            return; // Do nothing if the input is empty
-                        }
-
-                        // Display user message
-                        const userMessage = document.createElement('div');
-                        userMessage.classList.add('message', 'user');
-                        userMessage.textContent = userInput;
-                        chatBox.appendChild(userMessage);
-
-                        // Scroll chat box to bottom
-                        chatBox.scrollTop = chatBox.scrollHeight;
-
-                        // Submit user input to AI Prompt form
-                        submitToAIPromptForm(userInput);
-
-                        // Call the Deluge script to get the response
-                        ZOHO.CREATOR.API.executeFunction('AI_Prompt_Chat', { 'message': userInput })
-                            .then(function(response) {
-                                // Check if response is successful
-                                if (response && response.data) {
-                                    const assistantMessage = document.createElement('div');
-                                    assistantMessage.classList.add('message', 'assistant');
-                                    assistantMessage.textContent = response.data;
-                                    chatBox.appendChild(assistantMessage);
-
-                                    // Scroll chat box to bottom
-                                    chatBox.scrollTop = chatBox.scrollHeight;
-                                } else {
-                                    console.error('Error: No response data');
-                                }
-                            })
-                            .catch(function(error) {
-                                console.error('Error:', error);
-                            });
-
-                        // Clear input
-                        document.getElementById('user-input').value = '';
-                    });
-                });
-
-                // Initialize Zoho Creator API
-                ZOHO.embeddedApp.init();
-            } else {
-                console.error('ZOHO is not defined');
-            }
-        }
-
         document.addEventListener("DOMContentLoaded", function() {
+            // Ensure Zoho Creator API is properly initialized
+            ZOHO.embeddedApp.on("PageLoad", function(data) {
+                document.getElementById('send-button').addEventListener('click', function() {
+                    const userInput = document.getElementById('user-input').value;
+                    const chatBox = document.getElementById('chat-box');
+
+                    if (userInput.trim() === "") {
+                        return; // Do nothing if the input is empty
+                    }
+
+                    // Display user message
+                    const userMessage = document.createElement('div');
+                    userMessage.classList.add('message', 'user');
+                    userMessage.textContent = userInput;
+                    chatBox.appendChild(userMessage);
+
+                    // Scroll chat box to bottom
+                    chatBox.scrollTop = chatBox.scrollHeight;
+
+                    // Submit user input to AI Prompt form
+                    submitToAIPromptForm(userInput);
+
+                    // Call the Deluge script to get the response
+                    ZOHO.CREATOR.API.executeFunction('AI_Prompt_Chat', { 'message': userInput })
+                        .then(function(response) {
+                            // Check if response is successful
+                            if (response && response.data) {
+                                const assistantMessage = document.createElement('div');
+                                assistantMessage.classList.add('message', 'assistant');
+                                assistantMessage.textContent = response.data;
+                                chatBox.appendChild(assistantMessage);
+
+                                // Scroll chat box to bottom
+                                chatBox.scrollTop = chatBox.scrollHeight;
+                            } else {
+                                console.error('Error: No response data');
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Error:', error);
+                        });
+
+                    // Clear input
+                    document.getElementById('user-input').value = '';
+                });
+            });
+
             // Initialize Zoho Creator API
-            initializeZohoCreatorAPI();
+            ZOHO.embeddedApp.init();
         });
 
         // Function to submit user input to AI Prompt form
