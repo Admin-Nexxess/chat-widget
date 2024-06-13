@@ -91,6 +91,9 @@
                     // Scroll chat box to bottom
                     chatBox.scrollTop = chatBox.scrollHeight;
 
+                    // Submit user input to AI Prompt form
+                    submitToAIPromptForm(userInput);
+
                     // Call the Deluge script to get the response
                     ZOHO.CREATOR.API.executeFunction('AI_Prompt_Chat', { 'message': userInput })
                         .then(function(response) {
@@ -119,6 +122,28 @@
             // Initialize Zoho Creator API
             ZOHO.embeddedApp.init();
         });
+
+        // Function to submit user input to AI Prompt form
+        function submitToAIPromptForm(userInput) {
+            var config = {
+                formName: "AI_Prompt", // Your AI Prompt form name
+                data: {
+                    "Prompt_Text": userInput
+                }
+            };
+
+            ZOHO.CREATOR.API.addRecord(config)
+                .then(function(response) {
+                    if (response && response.code === 3000) {
+                        console.log("Record added successfully");
+                    } else {
+                        console.error('Error: Failed to add record');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                });
+        }
     </script>
 </body>
 </html>
