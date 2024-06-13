@@ -81,42 +81,36 @@
             if (typeof ZOHO !== 'undefined' && ZOHO !== null) {
                 console.log("ZOHO object is defined, setting up API...");
 
-                if (ZOHO.embeddedApp) {
-                    console.log("ZOHO.embeddedApp is defined");
+                ZOHO.embeddedApp.on("PageLoad", function(data) {
+                    console.log("Page loaded, setting up event listener...");
+                    document.getElementById('send-button').addEventListener('click', function() {
+                        const userInput = document.getElementById('user-input').value;
+                        const chatBox = document.getElementById('chat-box');
 
-                    ZOHO.embeddedApp.on("PageLoad", function(data) {
-                        console.log("Page loaded, setting up event listener...");
-                        document.getElementById('send-button').addEventListener('click', function() {
-                            const userInput = document.getElementById('user-input').value;
-                            const chatBox = document.getElementById('chat-box');
+                        if (userInput.trim() === "") {
+                            console.log("Input is empty, not sending...");
+                            return; // Do nothing if the input is empty
+                        }
 
-                            if (userInput.trim() === "") {
-                                console.log("Input is empty, not sending...");
-                                return; // Do nothing if the input is empty
-                            }
+                        // Display user message
+                        const userMessage = document.createElement('div');
+                        userMessage.classList.add('message', 'user');
+                        userMessage.textContent = userInput;
+                        chatBox.appendChild(userMessage);
 
-                            // Display user message
-                            const userMessage = document.createElement('div');
-                            userMessage.classList.add('message', 'user');
-                            userMessage.textContent = userInput;
-                            chatBox.appendChild(userMessage);
+                        // Scroll chat box to bottom
+                        chatBox.scrollTop = chatBox.scrollHeight;
 
-                            // Scroll chat box to bottom
-                            chatBox.scrollTop = chatBox.scrollHeight;
+                        // Clear input
+                        document.getElementById('user-input').value = '';
 
-                            // Clear input
-                            document.getElementById('user-input').value = '';
-
-                            // For now, log that the function was called
-                            console.log("submitToAIPromptForm function would be called here...");
-                        });
+                        // For now, log that the function was called
+                        console.log("submitToAIPromptForm function would be called here...");
                     });
+                });
 
-                    // Initialize Zoho Creator API
-                    ZOHO.embeddedApp.init();
-                } else {
-                    console.error("ZOHO.embeddedApp is not defined");
-                }
+                // Initialize Zoho Creator API
+                ZOHO.embeddedApp.init();
             } else {
                 console.error("ZOHO is not defined");
             }
