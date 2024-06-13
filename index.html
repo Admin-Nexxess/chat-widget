@@ -80,96 +80,52 @@
 
             if (typeof ZOHO !== 'undefined' && ZOHO !== null) {
                 console.log("ZOHO object is defined, setting up API...");
-                ZOHO.embeddedApp.on("PageLoad", function(data) {
-                    console.log("Page loaded, setting up event listener...");
-                    document.getElementById('send-button').addEventListener('click', function() {
-                        const userInput = document.getElementById('user-input').value;
-                        const chatBox = document.getElementById('chat-box');
 
-                        if (userInput.trim() === "") {
-                            console.log("Input is empty, not sending...");
-                            return; // Do nothing if the input is empty
-                        }
+                if (ZOHO.embeddedApp) {
+                    console.log("ZOHO.embeddedApp is defined");
 
-                        // Display user message
-                        const userMessage = document.createElement('div');
-                        userMessage.classList.add('message', 'user');
-                        userMessage.textContent = userInput;
-                        chatBox.appendChild(userMessage);
+                    ZOHO.embeddedApp.on("PageLoad", function(data) {
+                        console.log("Page loaded, setting up event listener...");
+                        document.getElementById('send-button').addEventListener('click', function() {
+                            const userInput = document.getElementById('user-input').value;
+                            const chatBox = document.getElementById('chat-box');
 
-                        // Scroll chat box to bottom
-                        chatBox.scrollTop = chatBox.scrollHeight;
+                            if (userInput.trim() === "") {
+                                console.log("Input is empty, not sending...");
+                                return; // Do nothing if the input is empty
+                            }
 
-                        // Submit user input to AI Prompt form
-                        submitToAIPromptForm(userInput);
+                            // Display user message
+                            const userMessage = document.createElement('div');
+                            userMessage.classList.add('message', 'user');
+                            userMessage.textContent = userInput;
+                            chatBox.appendChild(userMessage);
 
-                        // Call the Deluge script to get the response
-                        ZOHO.CREATOR.API.executeFunction('AI_Prompt_Chat', { 'message': userInput })
-                            .then(function(response) {
-                                console.log("Received response from Deluge script...");
-                                // Check if response is successful
-                                if (response && response.data) {
-                                    const assistantMessage = document.createElement('div');
-                                    assistantMessage.classList.add('message', 'assistant');
-                                    assistantMessage.textContent = response.data;
-                                    chatBox.appendChild(assistantMessage);
+                            // Scroll chat box to bottom
+                            chatBox.scrollTop = chatBox.scrollHeight;
 
-                                    // Scroll chat box to bottom
-                                    chatBox.scrollTop = chatBox.scrollHeight;
-                                } else {
-                                    console.error('Error: No response data');
-                                }
-                            })
-                            .catch(function(error) {
-                                console.error('Error:', error);
-                            });
+                            // Clear input
+                            document.getElementById('user-input').value = '';
 
-                        // Clear input
-                        document.getElementById('user-input').value = '';
+                            // For now, log that the function was called
+                            console.log("submitToAIPromptForm function would be called here...");
+                        });
                     });
-                });
 
-                // Initialize Zoho Creator API
-                ZOHO.embeddedApp.init();
-                console.log("Zoho Creator API initialized.");
+                    // Initialize Zoho Creator API
+                    ZOHO.embeddedApp.init();
+                } else {
+                    console.error("ZOHO.embeddedApp is not defined");
+                }
             } else {
-                console.error('ZOHO is not defined');
+                console.error("ZOHO is not defined");
             }
         }
 
         document.addEventListener("DOMContentLoaded", function() {
             console.log("DOM fully loaded and parsed, loading Zoho Creator SDK...");
-            // Wait for the Zoho Creator API script to load
-            const script = document.createElement('script');
-            script.src = 'https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js';
-            script.onload = initializeZohoCreatorAPI;
-            script.onerror = function() {
-                console.error('Failed to load Zoho Creator API script');
-            };
-            document.head.appendChild(script);
+            initializeZohoCreatorAPI();
         });
-
-        // Function to submit user input to AI Prompt form
-        function submitToAIPromptForm(userInput) {
-            var config = {
-                formName: "AI_Prompt", // Your AI Prompt form name
-                data: {
-                    "Prompt_Text": userInput
-                }
-            };
-
-            ZOHO.CREATOR.API.addRecord(config)
-                .then(function(response) {
-                    if (response && response.code === 3000) {
-                        console.log("Record added successfully");
-                    } else {
-                        console.error('Error: Failed to add record');
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error:', error);
-                });
-        }
     </script>
 </body>
 </html>
