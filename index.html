@@ -71,42 +71,53 @@
         </div>
     </div>
 
+    <!-- Include Zoho Creator API Script -->
+    <script src="https://creatorapp.zoho.com/widget/v2/zoho-creator-embed.js"></script>
+
     <script>
-        document.getElementById('send-button').addEventListener('click', function() {
-            const userInput = document.getElementById('user-input').value;
-            const chatBox = document.getElementById('chat-box');
+        document.addEventListener("DOMContentLoaded", function() {
+            // Ensure Zoho Creator API is properly initialized
+            ZOHO.embeddedApp.on("PageLoad", function(data) {
+                document.getElementById('send-button').addEventListener('click', function() {
+                    const userInput = document.getElementById('user-input').value;
+                    const chatBox = document.getElementById('chat-box');
 
-            // Display user message
-            const userMessage = document.createElement('div');
-            userMessage.classList.add('message', 'user');
-            userMessage.textContent = userInput;
-            chatBox.appendChild(userMessage);
+                    // Display user message
+                    const userMessage = document.createElement('div');
+                    userMessage.classList.add('message', 'user');
+                    userMessage.textContent = userInput;
+                    chatBox.appendChild(userMessage);
 
-            // Scroll chat box to bottom
-            chatBox.scrollTop = chatBox.scrollHeight;
+                    // Scroll chat box to bottom
+                    chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Call the Deluge script to get the response
-            ZOHO.CREATOR.API.executeFunction('AI_Prompt_Chat', { 'message': userInput })
-                .then(function(response) {
-                    // Check if response is successful
-                    if (response && response.data) {
-                        const assistantMessage = document.createElement('div');
-                        assistantMessage.classList.add('message', 'assistant');
-                        assistantMessage.textContent = response.data;
-                        chatBox.appendChild(assistantMessage);
+                    // Call the Deluge script to get the response
+                    ZOHO.CREATOR.API.executeFunction('AI_Prompt_Chat', { 'message': userInput })
+                        .then(function(response) {
+                            // Check if response is successful
+                            if (response && response.data) {
+                                const assistantMessage = document.createElement('div');
+                                assistantMessage.classList.add('message', 'assistant');
+                                assistantMessage.textContent = response.data;
+                                chatBox.appendChild(assistantMessage);
 
-                        // Scroll chat box to bottom
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    } else {
-                        console.error('Error: No response data');
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error:', error);
+                                // Scroll chat box to bottom
+                                chatBox.scrollTop = chatBox.scrollHeight;
+                            } else {
+                                console.error('Error: No response data');
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Error:', error);
+                        });
+
+                    // Clear input
+                    document.getElementById('user-input').value = '';
                 });
+            });
 
-            // Clear input
-            document.getElementById('user-input').value = '';
+            // Initialize Zoho Creator API
+            ZOHO.embeddedApp.init();
         });
     </script>
 </body>
