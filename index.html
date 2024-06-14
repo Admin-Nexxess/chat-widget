@@ -80,6 +80,7 @@
 
             ZOHO.embeddedApp.on("PageLoad", function(data) {
                 console.log("Page loaded, setting up event listener...");
+
                 document.getElementById('send-button').addEventListener('click', function() {
                     const userInput = document.getElementById('user-input').value;
                     const chatBox = document.getElementById('chat-box');
@@ -98,11 +99,11 @@
                     // Scroll chat box to bottom
                     chatBox.scrollTop = chatBox.scrollHeight;
 
+                    // Submit user input to AI Prompt form
+                    submitToAIPromptForm(userInput);
+
                     // Clear input
                     document.getElementById('user-input').value = '';
-
-                    // For now, log that the function was called
-                    console.log("submitToAIPromptForm function would be called here...");
                 });
             });
 
@@ -112,8 +113,66 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             console.log("DOM fully loaded and parsed, loading Zoho Creator SDK...");
-            initializeZohoCreatorAPI();
+
+            // Wait for the Zoho Creator SDK script to load
+            const script = document.createElement('script');
+            script.src = 'https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js';
+            script.onload = initializeZohoCreatorAPI;
+            script.onerror = function() {
+                console.error('Failed to load Zoho Creator API script');
+            };
+            document.head.appendChild(script);
         });
+
+        // Function to submit user input to AI Prompt form
+        function submitToAIPromptForm(userInput) {
+            var config = {
+                formName: "AI_Prompt", // Your AI Prompt form name
+                data: {
+                    "Prompt_Text": userInput
+                }
+            };
+
+            ZOHO.CREATOR.API.addRecord(config)
+                .then(function(response) {
+                    if (response && response.code === 3000) {
+                        console.log("Record added successfully");
+                        // Fetch the response after a delay to give time for processing
+                        setTimeout(fetchResponse, 3000);
+                    } else {
+                        console.error('Error: Failed to add record');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Function to fetch the response from AI Prompt form
+        function fetchResponse() {
+            ZOHO.CREATOR.API.getAllRecords({
+                reportName: "All_AI_Prompt",
+                page: 1,
+                pageSize: 1,
+                criteria: "Prompt_Text != null"
+            }).then(function(response) {
+                if (response && response.data.length > 0) {
+                    const latestRecord = response.data[0];
+                    const assistantMessage = document.createElement('div');
+                    assistantMessage.classList.add('message', 'assistant');
+                    assistantMessage.textContent = latestRecord.Response_Text;
+                    const chatBox = document.getElementById('chat-box');
+                    chatBox.appendChild(assistantMessage);
+
+                    // Scroll chat box to bottom
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } else {
+                    console.error('Error: No response data');
+                }
+            }).catch(function(error) {
+                console.error('Error:', error);
+            });
+        }
     </script>
 </body>
 </html>
