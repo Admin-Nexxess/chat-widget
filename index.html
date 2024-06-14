@@ -1,64 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Zoho Chat Widget</title>
     <style>
-        body, html {
-            height: 100%;
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
         }
         .chat-container {
+            width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            height: 750px;
-            max-width: 600px;
-            margin: auto;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
         }
         .chat-box {
             flex: 1;
-            overflow-y: auto;
             padding: 10px;
-            background: #f9f9f9;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-        }
-        .chat-box .message {
-            padding: 5px 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            display: inline-block;
-        }
-        .chat-box .message.user {
-            background: #d1e7dd;
-            align-self: flex-end;
-        }
-        .chat-box .message.assistant {
-            background: #e2e3e5;
-            align-self: flex-start;
+            overflow-y: auto;
+            border-bottom: 1px solid #ccc;
         }
         .input-box {
             display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
         }
         .input-box input {
             flex: 1;
             padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 5px 0 0 5px;
+            border-radius: 4px;
+            margin-right: 10px;
         }
         .input-box button {
-            padding: 10px;
+            padding: 10px 20px;
             border: none;
-            background: #0d6efd;
-            color: #fff;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
             cursor: pointer;
-            border-radius: 0 5px 5px 0;
+        }
+        .input-box button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            max-width: 80%;
+        }
+        .user {
+            background-color: #d1e7dd;
+            align-self: flex-end;
+        }
+        .assistant {
+            background-color: #f8d7da;
+            align-self: flex-start;
         }
     </style>
 </head>
@@ -70,114 +76,49 @@
             <button id="send-button">Send</button>
         </div>
     </div>
-
-    <!-- Include Zoho Creator Widget SDK -->
     <script src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
-
     <script>
-        function initializeZohoCreatorAPI() {
-            console.log("Initializing Zoho Creator API...");
+        const accessToken = 'YOUR_ACCESS_TOKEN';  // Replace with your access token
 
-            if (typeof ZOHO !== 'undefined' && ZOHO !== null) {
-                console.log("ZOHO object is defined, setting up API...");
-                ZOHO.embeddedApp.on("PageLoad", function(data) {
-                    console.log("Page loaded, setting up event listener...");
+        document.getElementById('send-button').addEventListener('click', function() {
+            const userInput = document.getElementById('user-input').value;
+            const chatBox = document.getElementById('chat-box');
 
-                    document.getElementById('send-button').addEventListener('click', function() {
-                        const userInput = document.getElementById('user-input').value;
-                        const chatBox = document.getElementById('chat-box');
+            if (userInput.trim() === "") return;
 
-                        if (userInput.trim() === "") {
-                            console.log("Input is empty, not sending...");
-                            return; // Do nothing if the input is empty
-                        }
+            // Display user message
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user');
+            userMessage.textContent = userInput;
+            chatBox.appendChild(userMessage);
 
-                        // Display user message
-                        const userMessage = document.createElement('div');
-                        userMessage.classList.add('message', 'user');
-                        userMessage.textContent = userInput;
-                        chatBox.appendChild(userMessage);
+            // Scroll chat box to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
 
-                        // Scroll chat box to bottom
-                        chatBox.scrollTop = chatBox.scrollHeight;
+            // Submit user input to AI Prompt form
+            fetch('https://creator.zoho.com/api/v2/YOUR_APP_OWNER/YOUR_APP_NAME/form/AI_Prompt', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Zoho-oauthtoken ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: { Prompt_Text: userInput } })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const assistantMessage = document.createElement('div');
+                assistantMessage.classList.add('message', 'assistant');
+                assistantMessage.textContent = data.data[0].response_field; // Replace 'response_field' with the actual field name from the AI Prompt form
+                chatBox.appendChild(assistantMessage);
 
-                        // Submit user input to AI Prompt form
-                        submitToAIPromptForm(userInput);
+                // Scroll chat box to bottom
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => console.error('Error:', error));
 
-                        // Clear input
-                        document.getElementById('user-input').value = '';
-                    });
-                });
-
-                // Initialize Zoho Creator API
-                ZOHO.embeddedApp.init();
-            } else {
-                console.error('ZOHO is not defined');
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            console.log("DOM fully loaded and parsed, loading Zoho Creator SDK...");
-
-            // Wait for the Zoho Creator SDK script to load
-            const script = document.createElement('script');
-            script.src = 'https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js';
-            script.onload = initializeZohoCreatorAPI;
-            script.onerror = function() {
-                console.error('Failed to load Zoho Creator API script');
-            };
-            document.head.appendChild(script);
+            // Clear input
+            document.getElementById('user-input').value = '';
         });
-
-        // Function to submit user input to AI Prompt form
-        function submitToAIPromptForm(userInput) {
-            var config = {
-                formName: "AI_Prompt", // Your AI Prompt form name
-                data: {
-                    "Prompt_Text": userInput
-                }
-            };
-
-            ZOHO.CREATOR.API.addRecord(config)
-                .then(function(response) {
-                    if (response && response.code === 3000) {
-                        console.log("Record added successfully");
-                        // Fetch the response after a delay to give time for processing
-                        setTimeout(fetchResponse, 3000);
-                    } else {
-                        console.error('Error: Failed to add record');
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error:', error);
-                });
-        }
-
-        // Function to fetch the response from AI Prompt form
-        function fetchResponse() {
-            ZOHO.CREATOR.API.getAllRecords({
-                reportName: "All_AI_Prompt",
-                page: 1,
-                pageSize: 1,
-                criteria: "Prompt_Text != null"
-            }).then(function(response) {
-                if (response && response.data.length > 0) {
-                    const latestRecord = response.data[0];
-                    const assistantMessage = document.createElement('div');
-                    assistantMessage.classList.add('message', 'assistant');
-                    assistantMessage.textContent = latestRecord.Response_Text;
-                    const chatBox = document.getElementById('chat-box');
-                    chatBox.appendChild(assistantMessage);
-
-                    // Scroll chat box to bottom
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                } else {
-                    console.error('Error: No response data');
-                }
-            }).catch(function(error) {
-                console.error('Error:', error);
-            });
-        }
     </script>
 </body>
 </html>
