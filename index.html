@@ -1,27 +1,18 @@
-s<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Zoho Chat Widget</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
-        }
+        /* Add your CSS styles here */
         .chat-container {
-            width: 400px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
             display: flex;
             flex-direction: column;
-            background-color: #fff;
+            height: 100vh;
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
         }
         .chat-box {
             flex: 1;
@@ -32,38 +23,39 @@ s<!DOCTYPE html>
         .input-box {
             display: flex;
             padding: 10px;
-            border-top: 1px solid #ccc;
+            background: #f9f9f9;
         }
         .input-box input {
             flex: 1;
             padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 10px;
+            border-radius: 5px;
         }
         .input-box button {
+            margin-left: 10px;
             padding: 10px 20px;
             border: none;
-            background-color: #007bff;
+            border-radius: 5px;
+            background: #007bff;
             color: white;
-            border-radius: 4px;
             cursor: pointer;
         }
         .input-box button:hover {
-            background-color: #0056b3;
+            background: #0056b3;
         }
         .message {
-            margin: 10px 0;
             padding: 10px;
-            border-radius: 4px;
-            max-width: 80%;
+            margin: 5px 0;
+            border-radius: 5px;
         }
-        .user {
-            background-color: #d1e7dd;
+        .message.user {
+            background: #007bff;
+            color: white;
             align-self: flex-end;
         }
-        .assistant {
-            background-color: #f8d7da;
+        .message.assistant {
+            background: #f1f1f1;
+            color: black;
             align-self: flex-start;
         }
     </style>
@@ -78,8 +70,6 @@ s<!DOCTYPE html>
     </div>
     <script src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
     <script>
-        const accessToken = '1000.fddc158ea482713f2fc1d159ab046010.035e41f0fcccf16b2b695a0bc5cb23fc';  // Replace with your access token
-
         document.getElementById('send-button').addEventListener('click', function() {
             const userInput = document.getElementById('user-input').value;
             const chatBox = document.getElementById('chat-box');
@@ -95,20 +85,20 @@ s<!DOCTYPE html>
             // Scroll chat box to bottom
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Submit user input to AI Prompt form
-            fetch('https://creator.zoho.com/api/v2/nexxsuite/nexxsuite/form/AI_Prompt', {
+            // Call the backend function
+            fetch('https://creator.zoho.com/api/v2/YOUR_APP_OWNER/YOUR_APP_NAME/function/chatwidgetAPITokenCalls', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Zoho-oauthtoken ${accessToken}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ data: { Prompt_Text: userInput } })
+                body: JSON.stringify({ user_input: userInput })
             })
             .then(response => response.json())
             .then(data => {
                 const assistantMessage = document.createElement('div');
                 assistantMessage.classList.add('message', 'assistant');
-                assistantMessage.textContent = data.data[0].Prompt_Reponse; // Replace 'response_field' with the actual field name from the AI Prompt form
+                assistantMessage.textContent = data.response.content;
                 chatBox.appendChild(assistantMessage);
 
                 // Scroll chat box to bottom
