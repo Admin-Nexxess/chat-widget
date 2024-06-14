@@ -3,7 +3,6 @@
 <head>
     <title>Zoho Chat Widget</title>
     <style>
-        /* CSS styles here */
         .chat-container {
             max-width: 500px;
             margin: 0 auto;
@@ -77,16 +76,13 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Get access token (this should be fetched securely)
-                const accessToken = '1000.310201076c0acb02189266059d1694c6.2237f01e9e552d49285e501b016f18d0'; // Replace with your access token
-
                 // Submit user input to proxy server
                 const response = await fetch('http://localhost:3000/proxy', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ accessToken, user_input: userInput })
+                    body: JSON.stringify({ user_input: userInput })
                 });
 
                 if (!response.ok) {
@@ -97,7 +93,14 @@
                 const data = await response.json();
                 const assistantMessage = document.createElement('div');
                 assistantMessage.classList.add('message', 'assistant');
-                assistantMessage.textContent = data.response.content;
+                
+                // Ensure 'data.response.content' is available
+                if (data && data.response && data.response.content) {
+                    assistantMessage.textContent = data.response.content;
+                } else {
+                    assistantMessage.textContent = 'No response from server.';
+                }
+                
                 chatBox.appendChild(assistantMessage);
 
                 // Scroll chat box to bottom
