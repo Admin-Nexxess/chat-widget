@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+s<!DOCTYPE html>
 <html>
 <head>
     <title>Zoho Chat Widget</title>
@@ -78,7 +78,7 @@
     </div>
     <script src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
     <script>
-        const accessToken = 'YOUR_ACCESS_TOKEN';  // Replace with your access token
+        const accessToken = '1000.fddc158ea482713f2fc1d159ab046010.035e41f0fcccf16b2b695a0bc5cb23fc';  // Replace with your access token
 
         document.getElementById('send-button').addEventListener('click', function() {
             const userInput = document.getElementById('user-input').value;
@@ -96,7 +96,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             // Submit user input to AI Prompt form
-            fetch('https://creator.zoho.com/api/v2/YOUR_APP_OWNER/YOUR_APP_NAME/form/AI_Prompt', {
+            fetch('https://creator.zoho.com/api/v2/nexxsuite/nexxsuite/form/AI_Prompt', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Zoho-oauthtoken ${accessToken}`,
@@ -108,7 +108,7 @@
             .then(data => {
                 const assistantMessage = document.createElement('div');
                 assistantMessage.classList.add('message', 'assistant');
-                assistantMessage.textContent = data.data[0].response_field; // Replace 'response_field' with the actual field name from the AI Prompt form
+                assistantMessage.textContent = data.data[0].Prompt_Reponse; // Replace 'response_field' with the actual field name from the AI Prompt form
                 chatBox.appendChild(assistantMessage);
 
                 // Scroll chat box to bottom
